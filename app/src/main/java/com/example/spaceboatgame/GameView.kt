@@ -122,7 +122,7 @@ class GameView(context: Context) : View(context) {
 
             // Pauza text
             canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
-            canvas.drawText("Klikni pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
+            canvas.drawText("Klikni na ▶ pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
             return
         }
 
@@ -340,7 +340,7 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Kontrola kliknutí na tlačítko pauzy
+                // Kontrola kliknutí na tlačítko pauzy/play
                 val buttonX = width - 120f
                 val buttonY = 90f
                 val buttonSize = 60f
@@ -351,12 +351,12 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Pokud je pauza, kliknutí kamkoliv jinde pokračuje ve hře
+                // Pokud je pauza, ignorovat ostatní kliknutí (pouze tlačítko funguje)
                 if (isPaused) {
-                    isPaused = false
                     return true
                 }
 
+                // Normální ovládání lodi (pouze když není pauza)
                 ship.x = event.x
                 return true
             }

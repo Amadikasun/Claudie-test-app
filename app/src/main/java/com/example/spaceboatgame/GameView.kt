@@ -66,8 +66,6 @@ class GameView(context: Context) : View(context) {
     private var coinSpawnTimer = 0
     private var obstacleSpawnTimer = 0
     private var lastUpdateTime = System.currentTimeMillis()
-    private var lastTapTime = 0L
-    private var pauseStartTime = 0L
 
     init {
         // Inicializace hvězd na pozadí
@@ -106,6 +104,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
             return
         }
+
+        // Vykreslení tlačítka pauzy
+        drawPauseButton(canvas)
 
         if (isPaused) {
             // Pauza obrazovka
@@ -326,8 +327,6 @@ class GameView(context: Context) : View(context) {
         obstacles.clear()
         coinSpawnTimer = 0
         obstacleSpawnTimer = 0
-        pauseStartTime = 0L
-        lastTapTime = 0L
         ship.x = width / 2f
         ship.y = height - 200f
         invalidate()
@@ -341,12 +340,19 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Pokud je pauza, kliknutí pokračuje ve hře (ale pouze pokud pauza běží alespoň 300ms)
+                // Během pauzy - jakékoliv kliknutí pokračuje ve hře
                 if (isPaused) {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - pauseStartTime > 300) {
-                        isPaused = false
-                    }
+                    isPaused = false
+                    return true
+                }
+
+                // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
+                val buttonX = width - 100f
+                val buttonY = 80f
+
+                // Velká klikací oblast pro snadné ovládání
+                if (event.x >= width - 150f && event.y <= 150f) {
+                    isPaused = true
                     return true
                 }
 
@@ -358,16 +364,6 @@ class GameView(context: Context) : View(context) {
                 if (!gameOver && !isPaused) {
                     ship.x = event.x
                 }
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                // Double tap pro pauzu
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastTapTime < 300 && !gameOver && !isPaused) {
-                    isPaused = true
-                    pauseStartTime = currentTime
-                }
-                lastTapTime = currentTime
                 return true
             }
         }

@@ -110,7 +110,7 @@ class GameView(context: Context) : View(context) {
 
         // Spawn nových překážek (asteroidů)
         obstacleSpawnTimer++
-        if (obstacleSpawnTimer > 45) {
+        if (obstacleSpawnTimer > 100) {
             obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
             obstacleSpawnTimer = 0
         }

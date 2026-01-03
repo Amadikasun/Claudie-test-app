@@ -14,10 +14,12 @@ class GameView(context: Context) : View(context) {
     // Herní objekty
     private val ship = Ship()
     private val coins = mutableListOf<Coin>()
+    private val obstacles = mutableListOf<Obstacle>()
     private val stars = mutableListOf<Star>()
 
-    // Skóre
+    // Skóre a stav hry
     private var score = 0
+    private var gameOver = false
 
     // Barvy a styly
     private val paint = Paint().apply {
@@ -30,8 +32,23 @@ class GameView(context: Context) : View(context) {
         isAntiAlias = true
     }
 
+    private val gameOverPaint = Paint().apply {
+        color = Color.RED
+        textSize = 100f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val restartPaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 50f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
     // Časovače
     private var coinSpawnTimer = 0
+    private var obstacleSpawnTimer = 0
     private var lastUpdateTime = System.currentTimeMillis()
 
     init {
@@ -64,8 +81,19 @@ class GameView(context: Context) : View(context) {
         // Vykreslení hvězd
         drawStars(canvas, deltaTime)
 
+        if (gameOver) {
+            // Game Over obrazovka
+            canvas.drawText("GAME OVER", width / 2f, height / 2f - 100f, gameOverPaint)
+            canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
+            canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
+            return
+        }
+
         // Aktualizace a vykreslení mincí
         updateCoins(canvas, deltaTime)
+
+        // Aktualizace a vykreslení překážek
+        updateObstacles(canvas, deltaTime)
 
         // Vykreslení lodi
         drawShip(canvas)
@@ -78,6 +106,13 @@ class GameView(context: Context) : View(context) {
         if (coinSpawnTimer > 60) {
             coins.add(Coin(Random.nextFloat() * width))
             coinSpawnTimer = 0
+        }
+
+        // Spawn nových překážek (asteroidů)
+        obstacleSpawnTimer++
+        if (obstacleSpawnTimer > 45) {
+            obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
+            obstacleSpawnTimer = 0
         }
 
         // Pokračovat v animaci
@@ -151,6 +186,35 @@ class GameView(context: Context) : View(context) {
         }
     }
 
+    private fun updateObstacles(canvas: Canvas, deltaTime: Float) {
+        val iterator = obstacles.iterator()
+        while (iterator.hasNext()) {
+            val obstacle = iterator.next()
+            obstacle.y += 400 * deltaTime
+
+            // Kontrola kolize s lodí
+            val distance = Math.sqrt(
+                ((ship.x - obstacle.x) * (ship.x - obstacle.x) +
+                (ship.y - obstacle.y) * (ship.y - obstacle.y)).toDouble()
+            )
+
+            if (distance < 60) {
+                gameOver = true
+                iterator.remove()
+                continue
+            }
+
+            // Odstranění překážek mimo obrazovku
+            if (obstacle.y > height) {
+                iterator.remove()
+                continue
+            }
+
+            // Vykreslení překážky
+            drawObstacle(canvas, obstacle)
+        }
+    }
+
     private fun drawCoin(canvas: Canvas, coin: Coin) {
         // Zlatá mince
         paint.color = Color.YELLOW
@@ -167,10 +231,47 @@ class GameView(context: Context) : View(context) {
         paint.textAlign = Paint.Align.LEFT
     }
 
+    private fun drawObstacle(canvas: Canvas, obstacle: Obstacle) {
+        // Asteroid - šedý kámen s drsným povrchem
+        paint.color = Color.GRAY
+        canvas.drawCircle(obstacle.x, obstacle.y, 35f, paint)
+
+        paint.color = Color.DKGRAY
+        canvas.drawCircle(obstacle.x, obstacle.y, 30f, paint)
+
+        // Krátery na asteroidu
+        paint.color = Color.rgb(60, 60, 60)
+        canvas.drawCircle(obstacle.x - 10f, obstacle.y - 8f, 8f, paint)
+        canvas.drawCircle(obstacle.x + 12f, obstacle.y + 5f, 6f, paint)
+        canvas.drawCircle(obstacle.x - 5f, obstacle.y + 12f, 5f, paint)
+    }
+
+    private fun restartGame() {
+        gameOver = false
+        score = 0
+        coins.clear()
+        obstacles.clear()
+        coinSpawnTimer = 0
+        obstacleSpawnTimer = 0
+        ship.x = width / 2f
+        ship.y = height - 200f
+        invalidate()
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_DOWN -> {
+                if (gameOver) {
+                    restartGame()
+                    return true
+                }
                 ship.x = event.x
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!gameOver) {
+                    ship.x = event.x
+                }
                 return true
             }
         }
@@ -180,5 +281,6 @@ class GameView(context: Context) : View(context) {
     // Datové třídy pro herní objekty
     data class Ship(var x: Float = 0f, var y: Float = 0f)
     data class Coin(var x: Float, var y: Float = 0f)
+    data class Obstacle(var x: Float, var y: Float = 0f)
     data class Star(var x: Float, var y: Float, val size: Float, val speed: Float = Random.nextFloat() + 0.5f)
 }

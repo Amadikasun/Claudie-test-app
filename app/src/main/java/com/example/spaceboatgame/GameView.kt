@@ -343,10 +343,16 @@ class GameView(context: Context) : View(context) {
                 // Kontrola kliknutí na tlačítko pauzy - funguje vždy (během hry i pauzy)
                 val buttonX = width - 120f
                 val buttonY = 90f
-                val buttonSize = 80f
+                val buttonWidth = 35f
+                val buttonHeight = 50f
 
-                if (event.x >= buttonX - 30f && event.x <= buttonX + buttonSize &&
-                    event.y >= buttonY - buttonSize / 2 && event.y <= buttonY + buttonSize / 2) {
+                // Zvětšená klikací oblast pro snadnější ovládání
+                val clickPadding = 30f
+
+                if (event.x >= buttonX - clickPadding &&
+                    event.x <= buttonX + buttonWidth + clickPadding &&
+                    event.y >= buttonY - buttonHeight / 2 - clickPadding &&
+                    event.y <= buttonY + buttonHeight / 2 + clickPadding) {
                     isPaused = !isPaused
                     return true
                 }

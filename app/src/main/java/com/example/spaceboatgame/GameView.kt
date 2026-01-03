@@ -102,6 +102,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("GAME OVER", width / 2f, height / 2f - 100f, gameOverPaint)
             canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
             canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
+
+            // Pokračovat v animaci i během game over
+            invalidate()
             return
         }
 
@@ -123,6 +126,9 @@ class GameView(context: Context) : View(context) {
             // Pauza text
             canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
             canvas.drawText("Klikni kamkoliv pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
+
+            // Pokračovat v animaci i během pauzy
+            invalidate()
             return
         }
 

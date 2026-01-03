@@ -14,10 +14,14 @@ class GameView(context: Context) : View(context) {
     // Herní objekty
     private val ship = Ship()
     private val coins = mutableListOf<Coin>()
+    private val obstacles = mutableListOf<Obstacle>()
     private val stars = mutableListOf<Star>()
 
-    // Skóre
+    // Skóre a stav hry
     private var score = 0
+    private var level = 1
+    private var gameOver = false
+    private var isPaused = false
 
     // Barvy a styly
     private val paint = Paint().apply {
@@ -30,8 +34,37 @@ class GameView(context: Context) : View(context) {
         isAntiAlias = true
     }
 
+    private val gameOverPaint = Paint().apply {
+        color = Color.RED
+        textSize = 100f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val restartPaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 50f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val pausePaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 45f
+        isAntiAlias = true
+        style = Paint.Style.FILL
+    }
+
+    private val pauseTextPaint = Paint().apply {
+        color = Color.YELLOW
+        textSize = 90f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
     // Časovače
     private var coinSpawnTimer = 0
+    private var obstacleSpawnTimer = 0
     private var lastUpdateTime = System.currentTimeMillis()
 
     init {
@@ -64,20 +97,70 @@ class GameView(context: Context) : View(context) {
         // Vykreslení hvězd
         drawStars(canvas, deltaTime)
 
+        if (gameOver) {
+            // Game Over obrazovka
+            canvas.drawText("GAME OVER", width / 2f, height / 2f - 100f, gameOverPaint)
+            canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
+            canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
+
+            // Pokračovat v animaci i během game over
+            invalidate()
+            return
+        }
+
+        // Vykreslení tlačítka pauzy
+        drawPauseButton(canvas)
+
+        if (isPaused) {
+            // Pauza obrazovka
+            // Vykreslení lodi a objektů (zmrazené)
+            updateCoins(canvas, 0f)
+            updateObstacles(canvas, 0f)
+            drawShip(canvas)
+
+            // Vykreslení skóre a levelu
+            canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
+            level = (score / 20) + 1
+            canvas.drawText("Level: $level", 50f, 180f, textPaint)
+
+            // Pauza text
+            canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
+            canvas.drawText("Klikni kamkoliv pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
+
+            // Pokračovat v animaci i během pauzy
+            invalidate()
+            return
+        }
+
         // Aktualizace a vykreslení mincí
         updateCoins(canvas, deltaTime)
+
+        // Aktualizace a vykreslení překážek
+        updateObstacles(canvas, deltaTime)
 
         // Vykreslení lodi
         drawShip(canvas)
 
-        // Vykreslení skóre
+        // Aktualizace levelu podle skóre
+        level = (score / 20) + 1
+
+        // Vykreslení skóre a levelu
         canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
+        canvas.drawText("Level: $level", 50f, 180f, textPaint)
 
         // Spawn nových mincí
         coinSpawnTimer++
         if (coinSpawnTimer > 60) {
             coins.add(Coin(Random.nextFloat() * width))
             coinSpawnTimer = 0
+        }
+
+        // Spawn nových překážek (asteroidů) - progresivní obtížnost
+        obstacleSpawnTimer++
+        val spawnInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
+        if (obstacleSpawnTimer > spawnInterval) {
+            obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
+            obstacleSpawnTimer = 0
         }
 
         // Pokračovat v animaci
@@ -151,6 +234,38 @@ class GameView(context: Context) : View(context) {
         }
     }
 
+    private fun updateObstacles(canvas: Canvas, deltaTime: Float) {
+        val iterator = obstacles.iterator()
+        while (iterator.hasNext()) {
+            val obstacle = iterator.next()
+
+            // Progresivní zvyšování rychlosti podle skóre
+            val speedMultiplier = 200 + ((score / 20) * 10)
+            obstacle.y += speedMultiplier * deltaTime
+
+            // Kontrola kolize s lodí
+            val distance = Math.sqrt(
+                ((ship.x - obstacle.x) * (ship.x - obstacle.x) +
+                (ship.y - obstacle.y) * (ship.y - obstacle.y)).toDouble()
+            )
+
+            if (distance < 60) {
+                gameOver = true
+                iterator.remove()
+                continue
+            }
+
+            // Odstranění překážek mimo obrazovku
+            if (obstacle.y > height) {
+                iterator.remove()
+                continue
+            }
+
+            // Vykreslení překážky
+            drawObstacle(canvas, obstacle)
+        }
+    }
+
     private fun drawCoin(canvas: Canvas, coin: Coin) {
         // Zlatá mince
         paint.color = Color.YELLOW
@@ -167,10 +282,94 @@ class GameView(context: Context) : View(context) {
         paint.textAlign = Paint.Align.LEFT
     }
 
+    private fun drawObstacle(canvas: Canvas, obstacle: Obstacle) {
+        // Asteroid - šedý kámen s drsným povrchem
+        paint.color = Color.GRAY
+        canvas.drawCircle(obstacle.x, obstacle.y, 35f, paint)
+
+        paint.color = Color.DKGRAY
+        canvas.drawCircle(obstacle.x, obstacle.y, 30f, paint)
+
+        // Krátery na asteroidu
+        paint.color = Color.rgb(60, 60, 60)
+        canvas.drawCircle(obstacle.x - 10f, obstacle.y - 8f, 8f, paint)
+        canvas.drawCircle(obstacle.x + 12f, obstacle.y + 5f, 6f, paint)
+        canvas.drawCircle(obstacle.x - 5f, obstacle.y + 12f, 5f, paint)
+    }
+
+    private fun drawPauseButton(canvas: Canvas) {
+        // Tlačítko pauzy v pravém horním rohu
+        val buttonX = width - 120f
+        val buttonY = 90f
+        val buttonWidth = 35f
+        val buttonHeight = 50f
+
+        if (isPaused) {
+            // Zobrazit trojúhelník (play symbol)
+            paint.color = Color.WHITE
+            val path = Path().apply {
+                moveTo(buttonX, buttonY - buttonHeight / 2)
+                lineTo(buttonX, buttonY + buttonHeight / 2)
+                lineTo(buttonX + buttonWidth, buttonY)
+                close()
+            }
+            canvas.drawPath(path, paint)
+        } else {
+            // Zobrazit dvě čáry (pause symbol ||)
+            paint.color = Color.WHITE
+            canvas.drawRect(buttonX, buttonY - buttonHeight / 2,
+                           buttonX + 12f, buttonY + buttonHeight / 2, paint)
+            canvas.drawRect(buttonX + 23f, buttonY - buttonHeight / 2,
+                           buttonX + 35f, buttonY + buttonHeight / 2, paint)
+        }
+    }
+
+    private fun restartGame() {
+        gameOver = false
+        isPaused = false
+        score = 0
+        level = 1
+        coins.clear()
+        obstacles.clear()
+        coinSpawnTimer = 0
+        obstacleSpawnTimer = 0
+        ship.x = width / 2f
+        ship.y = height - 200f
+        invalidate()
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_DOWN -> {
+                if (gameOver) {
+                    restartGame()
+                    return true
+                }
+
+                // Během pauzy - jakékoliv kliknutí pokračuje ve hře
+                if (isPaused) {
+                    isPaused = false
+                    return true
+                }
+
+                // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
+                val buttonX = width - 100f
+                val buttonY = 80f
+
+                // Velká klikací oblast pro snadné ovládání
+                if (event.x >= width - 150f && event.y <= 150f) {
+                    isPaused = true
+                    return true
+                }
+
+                // Normální ovládání lodi
                 ship.x = event.x
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!gameOver && !isPaused) {
+                    ship.x = event.x
+                }
                 return true
             }
         }
@@ -180,5 +379,6 @@ class GameView(context: Context) : View(context) {
     // Datové třídy pro herní objekty
     data class Ship(var x: Float = 0f, var y: Float = 0f)
     data class Coin(var x: Float, var y: Float = 0f)
+    data class Obstacle(var x: Float, var y: Float = 0f)
     data class Star(var x: Float, var y: Float, val size: Float, val speed: Float = Random.nextFloat() + 0.5f)
 }

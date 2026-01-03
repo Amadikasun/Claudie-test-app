@@ -1,6 +1,7 @@
 package com.example.spaceboatgame
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -10,6 +11,9 @@ import android.view.View
 import kotlin.random.Random
 
 class GameView(context: Context) : View(context) {
+
+    // Nastavení hry
+    private val settings = GameSettings(context)
 
     // Herní objekty
     private val ship = Ship()
@@ -103,6 +107,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
             canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
 
+            // Tlačítko nastavení
+            drawSettingsButton(canvas)
+
             // Pokračovat v animaci i během game over
             invalidate()
             return
@@ -127,6 +134,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
             canvas.drawText("Klikni kamkoliv pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
 
+            // Tlačítko nastavení
+            drawSettingsButton(canvas)
+
             // Pokračovat v animaci i během pauzy
             invalidate()
             return
@@ -150,14 +160,16 @@ class GameView(context: Context) : View(context) {
 
         // Spawn nových mincí
         coinSpawnTimer++
-        if (coinSpawnTimer > 60) {
+        val coinInterval = (60 * settings.getSpawnRateMultiplier()).toInt()
+        if (coinSpawnTimer > coinInterval) {
             coins.add(Coin(Random.nextFloat() * width))
             coinSpawnTimer = 0
         }
 
         // Spawn nových překážek (asteroidů) - progresivní obtížnost
         obstacleSpawnTimer++
-        val spawnInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
+        val baseInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
+        val spawnInterval = (baseInterval * settings.getSpawnRateMultiplier()).toInt()
         if (obstacleSpawnTimer > spawnInterval) {
             obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
             obstacleSpawnTimer = 0
@@ -180,7 +192,8 @@ class GameView(context: Context) : View(context) {
     }
 
     private fun drawShip(canvas: Canvas) {
-        paint.color = Color.CYAN
+        // Použití barvy z nastavení
+        paint.color = settings.getShipColorValue()
 
         // Kreslení vesmírné lodi (trojúhelník)
         val path = Path().apply {
@@ -209,7 +222,7 @@ class GameView(context: Context) : View(context) {
         val iterator = coins.iterator()
         while (iterator.hasNext()) {
             val coin = iterator.next()
-            coin.y += 300 * deltaTime
+            coin.y += 300 * deltaTime * settings.getSpeedMultiplier()
 
             // Kontrola kolize s lodí
             val distance = Math.sqrt(
@@ -239,9 +252,9 @@ class GameView(context: Context) : View(context) {
         while (iterator.hasNext()) {
             val obstacle = iterator.next()
 
-            // Progresivní zvyšování rychlosti podle skóre
+            // Progresivní zvyšování rychlosti podle skóre a obtížnosti
             val speedMultiplier = 200 + ((score / 20) * 10)
-            obstacle.y += speedMultiplier * deltaTime
+            obstacle.y += speedMultiplier * deltaTime * settings.getSpeedMultiplier()
 
             // Kontrola kolize s lodí
             val distance = Math.sqrt(
@@ -324,6 +337,44 @@ class GameView(context: Context) : View(context) {
         }
     }
 
+    private fun drawSettingsButton(canvas: Canvas) {
+        // Tlačítko nastavení uprostřed dole
+        val buttonX = width / 2f
+        val buttonY = height - 150f
+        val buttonWidth = 300f
+        val buttonHeight = 80f
+
+        // Pozadí tlačítka
+        paint.color = Color.rgb(50, 100, 200)
+        canvas.drawRoundRect(
+            buttonX - buttonWidth / 2,
+            buttonY - buttonHeight / 2,
+            buttonX + buttonWidth / 2,
+            buttonY + buttonHeight / 2,
+            20f, 20f, paint
+        )
+
+        // Okraj tlačítka
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 3f
+        canvas.drawRoundRect(
+            buttonX - buttonWidth / 2,
+            buttonY - buttonHeight / 2,
+            buttonX + buttonWidth / 2,
+            buttonY + buttonHeight / 2,
+            20f, 20f, paint
+        )
+        paint.style = Paint.Style.FILL
+
+        // Text tlačítka
+        paint.color = Color.WHITE
+        paint.textSize = 50f
+        paint.textAlign = Paint.Align.CENTER
+        canvas.drawText("⚙ NASTAVENÍ", buttonX, buttonY + 15f, paint)
+        paint.textAlign = Paint.Align.LEFT
+    }
+
     private fun restartGame() {
         gameOver = false
         isPaused = false
@@ -341,6 +392,24 @@ class GameView(context: Context) : View(context) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                // Kontrola kliknutí na tlačítko nastavení (během pauzy nebo game over)
+                if (gameOver || isPaused) {
+                    val settingsButtonX = width / 2f
+                    val settingsButtonY = height - 150f
+                    val settingsButtonWidth = 300f
+                    val settingsButtonHeight = 80f
+
+                    if (event.x >= settingsButtonX - settingsButtonWidth / 2 &&
+                        event.x <= settingsButtonX + settingsButtonWidth / 2 &&
+                        event.y >= settingsButtonY - settingsButtonHeight / 2 &&
+                        event.y <= settingsButtonY + settingsButtonHeight / 2) {
+                        // Otevřít obrazovku nastavení
+                        val intent = Intent(context, SettingsActivity::class.java)
+                        context.startActivity(intent)
+                        return true
+                    }
+                }
+
                 if (gameOver) {
                     restartGame()
                     return true

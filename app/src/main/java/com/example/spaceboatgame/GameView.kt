@@ -108,9 +108,10 @@ class GameView(context: Context) : View(context) {
             coinSpawnTimer = 0
         }
 
-        // Spawn nových překážek (asteroidů)
+        // Spawn nových překážek (asteroidů) - progresivní obtížnost
         obstacleSpawnTimer++
-        if (obstacleSpawnTimer > 100) {
+        val spawnInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
+        if (obstacleSpawnTimer > spawnInterval) {
             obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
             obstacleSpawnTimer = 0
         }
@@ -190,7 +191,10 @@ class GameView(context: Context) : View(context) {
         val iterator = obstacles.iterator()
         while (iterator.hasNext()) {
             val obstacle = iterator.next()
-            obstacle.y += 400 * deltaTime
+
+            // Progresivní zvyšování rychlosti podle skóre
+            val speedMultiplier = 200 + ((score / 20) * 10)
+            obstacle.y += speedMultiplier * deltaTime
 
             // Kontrola kolize s lodí
             val distance = Math.sqrt(

@@ -66,6 +66,7 @@ class GameView(context: Context) : View(context) {
     private var coinSpawnTimer = 0
     private var obstacleSpawnTimer = 0
     private var lastUpdateTime = System.currentTimeMillis()
+    private var lastTapTime = 0L
 
     init {
         // Inicializace hvězd na pozadí
@@ -105,9 +106,6 @@ class GameView(context: Context) : View(context) {
             return
         }
 
-        // Vykreslení tlačítka pauzy
-        drawPauseButton(canvas)
-
         if (isPaused) {
             // Pauza obrazovka
             // Vykreslení lodi a objektů (zmrazené)
@@ -121,9 +119,8 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("Level: $level", 50f, 180f, textPaint)
 
             // Pauza text
-            canvas.drawText("PAUZA", width / 2f, height / 2f - 100f, pauseTextPaint)
-            canvas.drawText("Klikni na spodní část", width / 2f, height / 2f + 50f, restartPaint)
-            canvas.drawText("obrazovky pro pokračování", width / 2f, height / 2f + 120f, restartPaint)
+            canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
+            canvas.drawText("Klikni kamkoliv pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
             return
         }
 
@@ -341,26 +338,9 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Pokud je pauza, kliknutí na spodní polovinu obrazovky pokračuje ve hře
+                // Pokud je pauza, JAKÉKOLIV kliknutí pokračuje ve hře
                 if (isPaused) {
-                    if (event.y > height / 2) {
-                        isPaused = false
-                    }
-                    return true
-                }
-
-                // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
-                val buttonX = width - 120f
-                val buttonY = 90f
-                val buttonWidth = 35f
-                val buttonHeight = 50f
-                val clickPadding = 40f
-
-                if (event.x >= buttonX - clickPadding &&
-                    event.x <= buttonX + buttonWidth + clickPadding &&
-                    event.y >= buttonY - buttonHeight / 2 - clickPadding &&
-                    event.y <= buttonY + buttonHeight / 2 + clickPadding) {
-                    isPaused = true
+                    isPaused = false
                     return true
                 }
 
@@ -372,6 +352,15 @@ class GameView(context: Context) : View(context) {
                 if (!gameOver && !isPaused) {
                     ship.x = event.x
                 }
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                // Double tap pro pauzu
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastTapTime < 300 && !gameOver) {
+                    isPaused = true
+                }
+                lastTapTime = currentTime
                 return true
             }
         }

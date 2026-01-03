@@ -67,6 +67,7 @@ class GameView(context: Context) : View(context) {
     private var obstacleSpawnTimer = 0
     private var lastUpdateTime = System.currentTimeMillis()
     private var lastTapTime = 0L
+    private var pauseStartTime = 0L
 
     init {
         // Inicializace hvězd na pozadí
@@ -325,6 +326,8 @@ class GameView(context: Context) : View(context) {
         obstacles.clear()
         coinSpawnTimer = 0
         obstacleSpawnTimer = 0
+        pauseStartTime = 0L
+        lastTapTime = 0L
         ship.x = width / 2f
         ship.y = height - 200f
         invalidate()
@@ -338,9 +341,12 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Pokud je pauza, JAKÉKOLIV kliknutí pokračuje ve hře
+                // Pokud je pauza, kliknutí pokračuje ve hře (ale pouze pokud pauza běží alespoň 300ms)
                 if (isPaused) {
-                    isPaused = false
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - pauseStartTime > 300) {
+                        isPaused = false
+                    }
                     return true
                 }
 
@@ -357,8 +363,9 @@ class GameView(context: Context) : View(context) {
             MotionEvent.ACTION_UP -> {
                 // Double tap pro pauzu
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - lastTapTime < 300 && !gameOver) {
+                if (currentTime - lastTapTime < 300 && !gameOver && !isPaused) {
                     isPaused = true
+                    pauseStartTime = currentTime
                 }
                 lastTapTime = currentTime
                 return true

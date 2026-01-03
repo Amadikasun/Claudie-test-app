@@ -160,16 +160,14 @@ class GameView(context: Context) : View(context) {
 
         // Spawn nových mincí
         coinSpawnTimer++
-        val coinInterval = (60 * settings.getSpawnRateMultiplier()).toInt()
-        if (coinSpawnTimer > coinInterval) {
+        if (coinSpawnTimer > 60) {
             coins.add(Coin(Random.nextFloat() * width))
             coinSpawnTimer = 0
         }
 
         // Spawn nových překážek (asteroidů) - progresivní obtížnost
         obstacleSpawnTimer++
-        val baseInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
-        val spawnInterval = (baseInterval * settings.getSpawnRateMultiplier()).toInt()
+        val spawnInterval = (150 - ((score / 20) * 5)).coerceAtLeast(30)
         if (obstacleSpawnTimer > spawnInterval) {
             obstacles.add(Obstacle(Random.nextFloat() * (width - 60) + 30))
             obstacleSpawnTimer = 0
@@ -222,7 +220,7 @@ class GameView(context: Context) : View(context) {
         val iterator = coins.iterator()
         while (iterator.hasNext()) {
             val coin = iterator.next()
-            coin.y += 300 * deltaTime * settings.getSpeedMultiplier()
+            coin.y += 300 * deltaTime
 
             // Kontrola kolize s lodí
             val distance = Math.sqrt(
@@ -252,9 +250,9 @@ class GameView(context: Context) : View(context) {
         while (iterator.hasNext()) {
             val obstacle = iterator.next()
 
-            // Progresivní zvyšování rychlosti podle skóre a obtížnosti
+            // Progresivní zvyšování rychlosti podle skóre
             val speedMultiplier = 200 + ((score / 20) * 10)
-            obstacle.y += speedMultiplier * deltaTime * settings.getSpeedMultiplier()
+            obstacle.y += speedMultiplier * deltaTime
 
             // Kontrola kolize s lodí
             val distance = Math.sqrt(

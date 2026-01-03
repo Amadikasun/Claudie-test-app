@@ -38,9 +38,6 @@ class SettingsActivity : Activity() {
         // Jméno hráče
         addPlayerNameSetting(mainLayout)
 
-        // Obtížnost
-        addDifficultySetting(mainLayout)
-
         // Barva lodi
         addShipColorSetting(mainLayout)
 
@@ -107,49 +104,6 @@ class SettingsActivity : Activity() {
         parent.addView(nameInput)
     }
 
-    private fun addDifficultySetting(parent: LinearLayout) {
-        val label = createLabel("Obtížnost:")
-        parent.addView(label)
-
-        val radioGroup = RadioGroup(this).apply {
-            orientation = RadioGroup.VERTICAL
-            setPadding(20, 10, 20, 10)
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = 40
-            }
-        }
-
-        val difficulties = listOf(
-            "🟢 Snadná" to GameSettings.DIFFICULTY_EASY,
-            "🟡 Normální" to GameSettings.DIFFICULTY_NORMAL,
-            "🔴 Těžká" to GameSettings.DIFFICULTY_HARD
-        )
-
-        difficulties.forEach { (text, value) ->
-            val radioButton = RadioButton(this).apply {
-                this.text = text
-                textSize = 18f
-                setTextColor(Color.WHITE)
-                id = View.generateViewId()
-                isChecked = settings.difficulty == value
-                setPadding(20, 20, 20, 20)
-            }
-
-            radioButton.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    settings.difficulty = value
-                }
-            }
-
-            radioGroup.addView(radioButton)
-        }
-
-        parent.addView(radioGroup)
-    }
-
     private fun addShipColorSetting(parent: LinearLayout) {
         val label = createLabel("Barva lodi:")
         parent.addView(label)
@@ -169,9 +123,7 @@ class SettingsActivity : Activity() {
         val colors = listOf(
             GameSettings.SHIP_COLOR_CYAN to Color.CYAN,
             GameSettings.SHIP_COLOR_GREEN to Color.GREEN,
-            GameSettings.SHIP_COLOR_RED to Color.RED,
-            GameSettings.SHIP_COLOR_PURPLE to Color.rgb(147, 112, 219),
-            GameSettings.SHIP_COLOR_GOLD to Color.rgb(255, 215, 0)
+            GameSettings.SHIP_COLOR_RED to Color.RED
         )
 
         colors.forEach { (colorId, colorValue) ->

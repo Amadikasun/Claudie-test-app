@@ -118,6 +118,9 @@ class GameView(context: Context) : View(context) {
         // Vykreslení tlačítka pauzy
         drawPauseButton(canvas)
 
+        // Vykreslení tlačítka nastavení (viditelné i během hry)
+        drawSettingsButton(canvas)
+
         if (isPaused) {
             // Pauza obrazovka
             // Vykreslení lodi a objektů (zmrazené)
@@ -336,8 +339,8 @@ class GameView(context: Context) : View(context) {
     }
 
     private fun drawSettingsButton(canvas: Canvas) {
-        // Tlačítko nastavení v pravém horním rohu (vedle pauzy)
-        val buttonX = width - 60f
+        // Tlačítko nastavení v pravém horním rohu (vlevo od pauzy)
+        val buttonX = width - 180f
         val buttonY = 90f
         val buttonSize = 60f
 
@@ -377,23 +380,21 @@ class GameView(context: Context) : View(context) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Kontrola kliknutí na tlačítko nastavení (během pauzy nebo game over)
-                if (gameOver || isPaused) {
-                    val settingsButtonX = width - 60f
-                    val settingsButtonY = 90f
-                    val settingsButtonRadius = 30f
+                // Kontrola kliknutí na tlačítko nastavení (kdykoliv)
+                val settingsButtonX = width - 180f
+                val settingsButtonY = 90f
+                val settingsButtonRadius = 30f
 
-                    val distance = Math.sqrt(
-                        ((event.x - settingsButtonX) * (event.x - settingsButtonX) +
-                        (event.y - settingsButtonY) * (event.y - settingsButtonY)).toDouble()
-                    )
+                val distanceSettings = Math.sqrt(
+                    ((event.x - settingsButtonX) * (event.x - settingsButtonX) +
+                    (event.y - settingsButtonY) * (event.y - settingsButtonY)).toDouble()
+                )
 
-                    if (distance < settingsButtonRadius + 20) {
-                        // Otevřít obrazovku nastavení
-                        val intent = Intent(context, SettingsActivity::class.java)
-                        context.startActivity(intent)
-                        return true
-                    }
+                if (distanceSettings < settingsButtonRadius + 20) {
+                    // Otevřít obrazovku nastavení
+                    val intent = Intent(context, SettingsActivity::class.java)
+                    context.startActivity(intent)
+                    return true
                 }
 
                 if (gameOver) {

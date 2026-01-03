@@ -47,6 +47,19 @@ class SettingsActivity : Activity() {
         // Vibrace
         addVibrationSetting(mainLayout)
 
+        // Červený text s vysvětlením
+        val noteText = TextView(this).apply {
+            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (specifický symbol)"
+            textSize = 14f
+            setTextColor(Color.RED)
+            setPadding(20, 40, 20, 20)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
+        mainLayout.addView(noteText)
+
         // Tlačítko zpět
         val backButton = Button(this).apply {
             text = "← ZPĚT DO HRY"
@@ -73,7 +86,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun addPlayerNameSetting(parent: LinearLayout) {
-        val label = createLabel("Jméno hráče:")
+        val label = createLabel("Jméno hráče: **")
         parent.addView(label)
 
         val nameInput = EditText(this).apply {

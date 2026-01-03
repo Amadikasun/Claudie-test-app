@@ -150,7 +150,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun addSoundSetting(parent: LinearLayout) {
-        val switchLayout = LinearLayout(this).apply {
+        val checkboxLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 10, 0, 10)
@@ -168,21 +168,21 @@ class SettingsActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT,
             1f
         )
-        switchLayout.addView(label)
+        checkboxLayout.addView(label)
 
-        val soundSwitch = Switch(this).apply {
+        val soundCheckbox = CheckBox(this).apply {
             isChecked = settings.soundEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 settings.soundEnabled = isChecked
             }
         }
-        switchLayout.addView(soundSwitch)
+        checkboxLayout.addView(soundCheckbox)
 
-        parent.addView(switchLayout)
+        parent.addView(checkboxLayout)
     }
 
     private fun addVibrationSetting(parent: LinearLayout) {
-        val switchLayout = LinearLayout(this).apply {
+        val checkboxLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 10, 0, 10)
@@ -200,17 +200,17 @@ class SettingsActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT,
             1f
         )
-        switchLayout.addView(label)
+        checkboxLayout.addView(label)
 
-        val vibrationSwitch = Switch(this).apply {
+        val vibrationCheckbox = CheckBox(this).apply {
             isChecked = settings.vibrationEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 settings.vibrationEnabled = isChecked
             }
         }
-        switchLayout.addView(vibrationSwitch)
+        checkboxLayout.addView(vibrationCheckbox)
 
-        parent.addView(switchLayout)
+        parent.addView(checkboxLayout)
     }
 
     private fun createLabel(text: String): TextView {

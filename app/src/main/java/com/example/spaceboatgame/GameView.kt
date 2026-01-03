@@ -121,8 +121,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("Level: $level", 50f, 180f, textPaint)
 
             // Pauza text
-            canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
-            canvas.drawText("Klikni na tlačítko pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
+            canvas.drawText("PAUZA", width / 2f, height / 2f - 100f, pauseTextPaint)
+            canvas.drawText("Klikni na spodní část", width / 2f, height / 2f + 50f, restartPaint)
+            canvas.drawText("obrazovky pro pokračování", width / 2f, height / 2f + 120f, restartPaint)
             return
         }
 
@@ -340,29 +341,30 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
-                // Kontrola kliknutí na tlačítko pauzy - funguje vždy (během hry i pauzy)
+                // Pokud je pauza, kliknutí na spodní polovinu obrazovky pokračuje ve hře
+                if (isPaused) {
+                    if (event.y > height / 2) {
+                        isPaused = false
+                    }
+                    return true
+                }
+
+                // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
                 val buttonX = width - 120f
                 val buttonY = 90f
                 val buttonWidth = 35f
                 val buttonHeight = 50f
-
-                // Zvětšená klikací oblast pro snadnější ovládání
-                val clickPadding = 30f
+                val clickPadding = 40f
 
                 if (event.x >= buttonX - clickPadding &&
                     event.x <= buttonX + buttonWidth + clickPadding &&
                     event.y >= buttonY - buttonHeight / 2 - clickPadding &&
                     event.y <= buttonY + buttonHeight / 2 + clickPadding) {
-                    isPaused = !isPaused
+                    isPaused = true
                     return true
                 }
 
-                // Pokud je pauza, ignorovat ostatní kliknutí
-                if (isPaused) {
-                    return true
-                }
-
-                // Normální ovládání lodi (pouze když není pauza)
+                // Normální ovládání lodi
                 ship.x = event.x
                 return true
             }

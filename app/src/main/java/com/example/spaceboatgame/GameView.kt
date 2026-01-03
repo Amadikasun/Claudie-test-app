@@ -336,40 +336,27 @@ class GameView(context: Context) : View(context) {
     }
 
     private fun drawSettingsButton(canvas: Canvas) {
-        // Tlačítko nastavení uprostřed dole
-        val buttonX = width / 2f
-        val buttonY = height - 150f
-        val buttonWidth = 300f
-        val buttonHeight = 80f
+        // Tlačítko nastavení v pravém horním rohu (vedle pauzy)
+        val buttonX = width - 60f
+        val buttonY = 90f
+        val buttonSize = 60f
 
-        // Pozadí tlačítka
-        paint.color = Color.rgb(50, 100, 200)
-        canvas.drawRoundRect(
-            buttonX - buttonWidth / 2,
-            buttonY - buttonHeight / 2,
-            buttonX + buttonWidth / 2,
-            buttonY + buttonHeight / 2,
-            20f, 20f, paint
-        )
+        // Kruh na pozadí
+        paint.color = Color.rgb(40, 40, 60)
+        canvas.drawCircle(buttonX, buttonY, buttonSize / 2, paint)
 
-        // Okraj tlačítka
+        // Okraj
         paint.color = Color.WHITE
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 3f
-        canvas.drawRoundRect(
-            buttonX - buttonWidth / 2,
-            buttonY - buttonHeight / 2,
-            buttonX + buttonWidth / 2,
-            buttonY + buttonHeight / 2,
-            20f, 20f, paint
-        )
+        paint.strokeWidth = 2f
+        canvas.drawCircle(buttonX, buttonY, buttonSize / 2, paint)
         paint.style = Paint.Style.FILL
 
-        // Text tlačítka
+        // Ikona ozubeného kolečka ⚙
         paint.color = Color.WHITE
         paint.textSize = 50f
         paint.textAlign = Paint.Align.CENTER
-        canvas.drawText("⚙ NASTAVENÍ", buttonX, buttonY + 15f, paint)
+        canvas.drawText("⚙", buttonX, buttonY + 18f, paint)
         paint.textAlign = Paint.Align.LEFT
     }
 
@@ -392,15 +379,16 @@ class GameView(context: Context) : View(context) {
             MotionEvent.ACTION_DOWN -> {
                 // Kontrola kliknutí na tlačítko nastavení (během pauzy nebo game over)
                 if (gameOver || isPaused) {
-                    val settingsButtonX = width / 2f
-                    val settingsButtonY = height - 150f
-                    val settingsButtonWidth = 300f
-                    val settingsButtonHeight = 80f
+                    val settingsButtonX = width - 60f
+                    val settingsButtonY = 90f
+                    val settingsButtonRadius = 30f
 
-                    if (event.x >= settingsButtonX - settingsButtonWidth / 2 &&
-                        event.x <= settingsButtonX + settingsButtonWidth / 2 &&
-                        event.y >= settingsButtonY - settingsButtonHeight / 2 &&
-                        event.y <= settingsButtonY + settingsButtonHeight / 2) {
+                    val distance = Math.sqrt(
+                        ((event.x - settingsButtonX) * (event.x - settingsButtonX) +
+                        (event.y - settingsButtonY) * (event.y - settingsButtonY)).toDouble()
+                    )
+
+                    if (distance < settingsButtonRadius + 20) {
                         // Otevřít obrazovku nastavení
                         val intent = Intent(context, SettingsActivity::class.java)
                         context.startActivity(intent)

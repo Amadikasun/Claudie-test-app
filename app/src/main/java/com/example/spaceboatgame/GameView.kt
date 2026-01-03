@@ -19,6 +19,7 @@ class GameView(context: Context) : View(context) {
 
     // Skóre a stav hry
     private var score = 0
+    private var level = 1
     private var gameOver = false
 
     // Barvy a styly
@@ -98,8 +99,12 @@ class GameView(context: Context) : View(context) {
         // Vykreslení lodi
         drawShip(canvas)
 
-        // Vykreslení skóre
+        // Aktualizace levelu podle skóre
+        level = (score / 20) + 1
+
+        // Vykreslení skóre a levelu
         canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
+        canvas.drawText("Level: $level", 50f, 180f, textPaint)
 
         // Spawn nových mincí
         coinSpawnTimer++
@@ -253,6 +258,7 @@ class GameView(context: Context) : View(context) {
     private fun restartGame() {
         gameOver = false
         score = 0
+        level = 1
         coins.clear()
         obstacles.clear()
         coinSpawnTimer = 0

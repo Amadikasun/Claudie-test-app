@@ -21,6 +21,7 @@ class GameView(context: Context) : View(context) {
     private var score = 0
     private var level = 1
     private var gameOver = false
+    private var isPaused = false
 
     // Barvy a styly
     private val paint = Paint().apply {
@@ -43,6 +44,20 @@ class GameView(context: Context) : View(context) {
     private val restartPaint = Paint().apply {
         color = Color.WHITE
         textSize = 50f
+        isAntiAlias = true
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val pausePaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 45f
+        isAntiAlias = true
+        style = Paint.Style.FILL
+    }
+
+    private val pauseTextPaint = Paint().apply {
+        color = Color.YELLOW
+        textSize = 90f
         isAntiAlias = true
         textAlign = Paint.Align.CENTER
     }
@@ -87,6 +102,27 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("GAME OVER", width / 2f, height / 2f - 100f, gameOverPaint)
             canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
             canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
+            return
+        }
+
+        // Vykreslení tlačítka pauzy
+        drawPauseButton(canvas)
+
+        if (isPaused) {
+            // Pauza obrazovka
+            // Vykreslení lodi a objektů (zmrazené)
+            updateCoins(canvas, 0f)
+            updateObstacles(canvas, 0f)
+            drawShip(canvas)
+
+            // Vykreslení skóre a levelu
+            canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
+            level = (score / 20) + 1
+            canvas.drawText("Level: $level", 50f, 180f, textPaint)
+
+            // Pauza text
+            canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
+            canvas.drawText("Klikni pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
             return
         }
 
@@ -255,8 +291,36 @@ class GameView(context: Context) : View(context) {
         canvas.drawCircle(obstacle.x - 5f, obstacle.y + 12f, 5f, paint)
     }
 
+    private fun drawPauseButton(canvas: Canvas) {
+        // Tlačítko pauzy v pravém horním rohu
+        val buttonX = width - 120f
+        val buttonY = 90f
+        val buttonWidth = 35f
+        val buttonHeight = 50f
+
+        if (isPaused) {
+            // Zobrazit trojúhelník (play symbol)
+            paint.color = Color.WHITE
+            val path = Path().apply {
+                moveTo(buttonX, buttonY - buttonHeight / 2)
+                lineTo(buttonX, buttonY + buttonHeight / 2)
+                lineTo(buttonX + buttonWidth, buttonY)
+                close()
+            }
+            canvas.drawPath(path, paint)
+        } else {
+            // Zobrazit dvě čáry (pause symbol ||)
+            paint.color = Color.WHITE
+            canvas.drawRect(buttonX, buttonY - buttonHeight / 2,
+                           buttonX + 12f, buttonY + buttonHeight / 2, paint)
+            canvas.drawRect(buttonX + 23f, buttonY - buttonHeight / 2,
+                           buttonX + 35f, buttonY + buttonHeight / 2, paint)
+        }
+    }
+
     private fun restartGame() {
         gameOver = false
+        isPaused = false
         score = 0
         level = 1
         coins.clear()
@@ -275,11 +339,29 @@ class GameView(context: Context) : View(context) {
                     restartGame()
                     return true
                 }
+
+                // Kontrola kliknutí na tlačítko pauzy
+                val buttonX = width - 120f
+                val buttonY = 90f
+                val buttonSize = 60f
+
+                if (event.x >= buttonX - 20f && event.x <= buttonX + buttonSize &&
+                    event.y >= buttonY - buttonSize / 2 && event.y <= buttonY + buttonSize / 2) {
+                    isPaused = !isPaused
+                    return true
+                }
+
+                // Pokud je pauza, kliknutí kamkoliv jinde pokračuje ve hře
+                if (isPaused) {
+                    isPaused = false
+                    return true
+                }
+
                 ship.x = event.x
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
-                if (!gameOver) {
+                if (!gameOver && !isPaused) {
                     ship.x = event.x
                 }
                 return true

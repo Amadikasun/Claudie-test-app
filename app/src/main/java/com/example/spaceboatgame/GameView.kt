@@ -1,6 +1,7 @@
 package com.example.spaceboatgame
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -10,6 +11,9 @@ import android.view.View
 import kotlin.random.Random
 
 class GameView(context: Context) : View(context) {
+
+    // Nastavení hry
+    private val settings = GameSettings(context)
 
     // Herní objekty
     private val ship = Ship()
@@ -103,6 +107,9 @@ class GameView(context: Context) : View(context) {
             canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
             canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
 
+            // Tlačítko nastavení
+            drawSettingsButton(canvas)
+
             // Pokračovat v animaci i během game over
             invalidate()
             return
@@ -110,6 +117,9 @@ class GameView(context: Context) : View(context) {
 
         // Vykreslení tlačítka pauzy
         drawPauseButton(canvas)
+
+        // Vykreslení tlačítka nastavení (viditelné i během hry)
+        drawSettingsButton(canvas)
 
         if (isPaused) {
             // Pauza obrazovka
@@ -126,6 +136,9 @@ class GameView(context: Context) : View(context) {
             // Pauza text
             canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
             canvas.drawText("Klikni kamkoliv pro pokračování", width / 2f, height / 2f + 100f, restartPaint)
+
+            // Tlačítko nastavení
+            drawSettingsButton(canvas)
 
             // Pokračovat v animaci i během pauzy
             invalidate()
@@ -180,7 +193,8 @@ class GameView(context: Context) : View(context) {
     }
 
     private fun drawShip(canvas: Canvas) {
-        paint.color = Color.CYAN
+        // Použití barvy z nastavení
+        paint.color = settings.getShipColorValue()
 
         // Kreslení vesmírné lodi (trojúhelník)
         val path = Path().apply {
@@ -324,6 +338,31 @@ class GameView(context: Context) : View(context) {
         }
     }
 
+    private fun drawSettingsButton(canvas: Canvas) {
+        // Tlačítko nastavení v pravém horním rohu (vlevo od pauzy)
+        val buttonX = width - 180f
+        val buttonY = 90f
+        val buttonSize = 60f
+
+        // Kruh na pozadí
+        paint.color = Color.rgb(40, 40, 60)
+        canvas.drawCircle(buttonX, buttonY, buttonSize / 2, paint)
+
+        // Okraj
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 2f
+        canvas.drawCircle(buttonX, buttonY, buttonSize / 2, paint)
+        paint.style = Paint.Style.FILL
+
+        // Ikona ozubeného kolečka ⚙
+        paint.color = Color.WHITE
+        paint.textSize = 50f
+        paint.textAlign = Paint.Align.CENTER
+        canvas.drawText("⚙", buttonX, buttonY + 18f, paint)
+        paint.textAlign = Paint.Align.LEFT
+    }
+
     private fun restartGame() {
         gameOver = false
         isPaused = false
@@ -341,6 +380,23 @@ class GameView(context: Context) : View(context) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                // Kontrola kliknutí na tlačítko nastavení (kdykoliv)
+                val settingsButtonX = width - 180f
+                val settingsButtonY = 90f
+                val settingsButtonRadius = 30f
+
+                val distanceSettings = Math.sqrt(
+                    ((event.x - settingsButtonX) * (event.x - settingsButtonX) +
+                    (event.y - settingsButtonY) * (event.y - settingsButtonY)).toDouble()
+                )
+
+                if (distanceSettings < settingsButtonRadius + 20) {
+                    // Otevřít obrazovku nastavení
+                    val intent = Intent(context, SettingsActivity::class.java)
+                    context.startActivity(intent)
+                    return true
+                }
+
                 if (gameOver) {
                     restartGame()
                     return true

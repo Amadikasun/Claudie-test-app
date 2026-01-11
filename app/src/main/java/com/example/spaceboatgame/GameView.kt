@@ -313,7 +313,7 @@ class GameView(context: Context) : View(context) {
 
     private fun drawPauseButton(canvas: Canvas) {
         // Tlačítko pauzy v pravém horním rohu (vlevo od nastavení)
-        val buttonX = width - 260f
+        val buttonX = width - 320f
         val buttonY = 90f
         val buttonWidth = 55f
         val buttonHeight = 70f
@@ -409,7 +409,7 @@ class GameView(context: Context) : View(context) {
                 }
 
                 // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
-                val pauseButtonX = width - 260f
+                val pauseButtonX = width - 320f
                 val pauseButtonY = 90f
 
                 // Velká klikací oblast pro snadné ovládání

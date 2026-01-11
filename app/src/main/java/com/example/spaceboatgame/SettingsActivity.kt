@@ -230,6 +230,14 @@ class SettingsActivity : Activity() {
     }
 
     private fun addVsTextboxSetting(parent: LinearLayout) {
+        val vsLabel = TextView(this).apply {
+            text = "VS (Variabilní symbol):"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setPadding(0, 20, 0, 10)
+        }
+        parent.addView(vsLabel)
+
         val vsInput = EditText(this).apply {
             hint = "Zadejte text"
             textSize = 18f
@@ -242,24 +250,10 @@ class SettingsActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = 10
-            }
-        }
-        parent.addView(vsInput)
-
-        val vsLabel = TextView(this).apply {
-            text = "VS:"
-            textSize = 20f
-            setTextColor(Color.WHITE)
-            setPadding(0, 10, 0, 10)
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
                 bottomMargin = 40
             }
         }
-        parent.addView(vsLabel)
+        parent.addView(vsInput)
     }
 
     private fun createLabel(text: String): TextView {

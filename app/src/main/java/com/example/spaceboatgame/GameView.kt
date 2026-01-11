@@ -131,7 +131,7 @@ class GameView(context: Context) : View(context) {
             // Vykreslení skóre a levelu
             canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
             level = (score / 20) + 1
-            canvas.drawText("Level: $level", 50f, 180f, textPaint)
+            canvas.drawText("Lvl: $level", 50f, 180f, textPaint)
 
             // Pauza text
             canvas.drawText("PAUZA", width / 2f, height / 2f, pauseTextPaint)
@@ -159,7 +159,7 @@ class GameView(context: Context) : View(context) {
 
         // Vykreslení skóre a levelu
         canvas.drawText("Skóre: $score", 50f, 100f, textPaint)
-        canvas.drawText("Level: $level", 50f, 180f, textPaint)
+        canvas.drawText("Lvl: $level", 50f, 180f, textPaint)
 
         // Spawn nových mincí
         coinSpawnTimer++
@@ -312,11 +312,11 @@ class GameView(context: Context) : View(context) {
     }
 
     private fun drawPauseButton(canvas: Canvas) {
-        // Tlačítko pauzy v pravém horním rohu
-        val buttonX = width - 120f
+        // Tlačítko pauzy v pravém horním rohu (vlevo od nastavení)
+        val buttonX = width - 320f
         val buttonY = 90f
-        val buttonWidth = 35f
-        val buttonHeight = 50f
+        val buttonWidth = 55f
+        val buttonHeight = 70f
 
         if (isPaused) {
             // Zobrazit trojúhelník (play symbol)
@@ -332,17 +332,17 @@ class GameView(context: Context) : View(context) {
             // Zobrazit dvě čáry (pause symbol ||)
             paint.color = Color.WHITE
             canvas.drawRect(buttonX, buttonY - buttonHeight / 2,
-                           buttonX + 12f, buttonY + buttonHeight / 2, paint)
-            canvas.drawRect(buttonX + 23f, buttonY - buttonHeight / 2,
-                           buttonX + 35f, buttonY + buttonHeight / 2, paint)
+                           buttonX + 18f, buttonY + buttonHeight / 2, paint)
+            canvas.drawRect(buttonX + 37f, buttonY - buttonHeight / 2,
+                           buttonX + 55f, buttonY + buttonHeight / 2, paint)
         }
     }
 
     private fun drawSettingsButton(canvas: Canvas) {
-        // Tlačítko nastavení v pravém horním rohu (vlevo od pauzy)
-        val buttonX = width - 180f
+        // Tlačítko nastavení v pravém horním rohu
+        val buttonX = width - 70f
         val buttonY = 90f
-        val buttonSize = 60f
+        val buttonSize = 100f
 
         // Kruh na pozadí
         paint.color = Color.rgb(40, 40, 60)
@@ -351,15 +351,15 @@ class GameView(context: Context) : View(context) {
         // Okraj
         paint.color = Color.WHITE
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 2f
+        paint.strokeWidth = 3f
         canvas.drawCircle(buttonX, buttonY, buttonSize / 2, paint)
         paint.style = Paint.Style.FILL
 
         // Ikona ozubeného kolečka ⚙
         paint.color = Color.WHITE
-        paint.textSize = 50f
+        paint.textSize = 80f
         paint.textAlign = Paint.Align.CENTER
-        canvas.drawText("⚙", buttonX, buttonY + 18f, paint)
+        canvas.drawText("⚙", buttonX, buttonY + 25f, paint)
         paint.textAlign = Paint.Align.LEFT
     }
 
@@ -381,9 +381,9 @@ class GameView(context: Context) : View(context) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 // Kontrola kliknutí na tlačítko nastavení (kdykoliv)
-                val settingsButtonX = width - 180f
+                val settingsButtonX = width - 70f
                 val settingsButtonY = 90f
-                val settingsButtonRadius = 30f
+                val settingsButtonRadius = 50f
 
                 val distanceSettings = Math.sqrt(
                     ((event.x - settingsButtonX) * (event.x - settingsButtonX) +
@@ -409,11 +409,12 @@ class GameView(context: Context) : View(context) {
                 }
 
                 // Kontrola kliknutí na tlačítko pauzy (pouze během hry)
-                val buttonX = width - 100f
-                val buttonY = 80f
+                val pauseButtonX = width - 320f
+                val pauseButtonY = 90f
 
                 // Velká klikací oblast pro snadné ovládání
-                if (event.x >= width - 150f && event.y <= 150f) {
+                if (event.x >= pauseButtonX - 40f && event.x <= pauseButtonX + 95f &&
+                    event.y >= pauseButtonY - 60f && event.y <= pauseButtonY + 60f) {
                     isPaused = true
                     return true
                 }

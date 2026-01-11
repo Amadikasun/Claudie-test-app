@@ -38,6 +38,9 @@ class SettingsActivity : Activity() {
         // Jméno hráče
         addPlayerNameSetting(mainLayout)
 
+        // Textbox s VS: textem
+        addVsTextboxSetting(mainLayout)
+
         // Barva lodi
         addShipColorSetting(mainLayout)
 
@@ -49,7 +52,7 @@ class SettingsActivity : Activity() {
 
         // Červený text s vysvětlením
         val noteText = TextView(this).apply {
-            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (specifický symbol)"
+            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (VS)"
             textSize = 14f
             setTextColor(Color.RED)
             setPadding(20, 40, 20, 20)
@@ -86,7 +89,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun addPlayerNameSetting(parent: LinearLayout) {
-        val label = createLabel("Jméno hráče: **")
+        val label = createLabel("Jméno hráče: ")
         parent.addView(label)
 
         val nameInput = EditText(this).apply {
@@ -224,6 +227,33 @@ class SettingsActivity : Activity() {
         checkboxLayout.addView(vibrationCheckbox)
 
         parent.addView(checkboxLayout)
+    }
+
+    private fun addVsTextboxSetting(parent: LinearLayout) {
+        val vsLabel = TextView(this).apply {
+            text = "Číslo: **"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setPadding(0, 20, 0, 10)
+        }
+        parent.addView(vsLabel)
+
+        val vsInput = EditText(this).apply {
+            hint = "0000"
+            textSize = 18f
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.LTGRAY)
+            setBackgroundColor(Color.rgb(40, 40, 60))
+            setPadding(30, 20, 30, 20)
+            inputType = InputType.TYPE_CLASS_TEXT
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 40
+            }
+        }
+        parent.addView(vsInput)
     }
 
     private fun createLabel(text: String): TextView {

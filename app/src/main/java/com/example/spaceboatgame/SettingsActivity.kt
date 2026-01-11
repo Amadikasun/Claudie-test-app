@@ -52,7 +52,7 @@ class SettingsActivity : Activity() {
 
         // Červený text s vysvětlením
         val noteText = TextView(this).apply {
-            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (variabilní symbol)"
+            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (VS)"
             textSize = 14f
             setTextColor(Color.RED)
             setPadding(20, 40, 20, 20)
@@ -231,7 +231,7 @@ class SettingsActivity : Activity() {
 
     private fun addVsTextboxSetting(parent: LinearLayout) {
         val vsLabel = TextView(this).apply {
-            text = "VS (Variabilní symbol):"
+            text = "Číslo:"
             textSize = 20f
             setTextColor(Color.WHITE)
             setPadding(0, 20, 0, 10)

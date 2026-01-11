@@ -89,7 +89,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun addPlayerNameSetting(parent: LinearLayout) {
-        val label = createLabel("Jméno hráče: **")
+        val label = createLabel("Jméno hráče: ")
         parent.addView(label)
 
         val nameInput = EditText(this).apply {
@@ -231,7 +231,7 @@ class SettingsActivity : Activity() {
 
     private fun addVsTextboxSetting(parent: LinearLayout) {
         val vsLabel = TextView(this).apply {
-            text = "Číslo:"
+            text = "Číslo: **"
             textSize = 20f
             setTextColor(Color.WHITE)
             setPadding(0, 20, 0, 10)
@@ -239,7 +239,7 @@ class SettingsActivity : Activity() {
         parent.addView(vsLabel)
 
         val vsInput = EditText(this).apply {
-            hint = "Zadejte text"
+            hint = "0000"
             textSize = 18f
             setTextColor(Color.WHITE)
             setHintTextColor(Color.LTGRAY)

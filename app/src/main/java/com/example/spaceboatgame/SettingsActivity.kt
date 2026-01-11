@@ -38,6 +38,9 @@ class SettingsActivity : Activity() {
         // Jméno hráče
         addPlayerNameSetting(mainLayout)
 
+        // Textbox s VS: textem
+        addVsTextboxSetting(mainLayout)
+
         // Barva lodi
         addShipColorSetting(mainLayout)
 
@@ -224,6 +227,39 @@ class SettingsActivity : Activity() {
         checkboxLayout.addView(vibrationCheckbox)
 
         parent.addView(checkboxLayout)
+    }
+
+    private fun addVsTextboxSetting(parent: LinearLayout) {
+        val vsInput = EditText(this).apply {
+            hint = "Zadejte text"
+            textSize = 18f
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.LTGRAY)
+            setBackgroundColor(Color.rgb(40, 40, 60))
+            setPadding(30, 20, 30, 20)
+            inputType = InputType.TYPE_CLASS_TEXT
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 10
+            }
+        }
+        parent.addView(vsInput)
+
+        val vsLabel = TextView(this).apply {
+            text = "VS:"
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setPadding(0, 10, 0, 10)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 40
+            }
+        }
+        parent.addView(vsLabel)
     }
 
     private fun createLabel(text: String): TextView {

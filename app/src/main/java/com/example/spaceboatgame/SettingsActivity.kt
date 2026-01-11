@@ -127,7 +127,7 @@ class SettingsActivity : Activity() {
         val colorContainer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            setPadding(0, 10, 0, 10)
+            setPadding(10, 10, 10, 10)
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -147,8 +147,8 @@ class SettingsActivity : Activity() {
                 text = if (settings.shipColor == colorId) "✓" else ""
                 setBackgroundColor(colorValue)
                 setTextColor(Color.WHITE)
-                textSize = 24f
-                layoutParams = LinearLayout.LayoutParams(100, 100).apply {
+                textSize = 20f
+                layoutParams = LinearLayout.LayoutParams(110, 110).apply {
                     marginStart = 10
                     marginEnd = 10
                 }

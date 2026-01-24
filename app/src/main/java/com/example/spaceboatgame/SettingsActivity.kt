@@ -52,7 +52,7 @@ class SettingsActivity : Activity() {
 
         // Červený text s vysvětlením
         val noteText = TextView(this).apply {
-            text = "** Pro hráče stargate-online pro přičítání naq se musí schodovat nick name a číslo (VS)"
+            text = "** Pro hráče stargame-online pro přičítání naq se musí schodovat nick name a číslo (VS)"
             textSize = 14f
             setTextColor(Color.RED)
             setPadding(20, 40, 20, 20)

@@ -18,6 +18,10 @@
             android:name=".SettingsActivity"
             android:screenOrientation="portrait"
             android:exported="false" />
+        <activity
+            android:name=".GameResultsActivity"
+            android:screenOrientation="portrait"
+            android:exported="false" />
     </application>
 
 </manifest>

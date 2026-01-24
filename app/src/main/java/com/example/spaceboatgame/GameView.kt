@@ -26,6 +26,7 @@ class GameView(context: Context) : View(context) {
     private var level = 1
     private var gameOver = false
     private var isPaused = false
+    private var resultSaved = false
 
     // Barvy a styly
     private val paint = Paint().apply {
@@ -103,9 +104,12 @@ class GameView(context: Context) : View(context) {
 
         if (gameOver) {
             // Game Over obrazovka
-            canvas.drawText("GAME OVER", width / 2f, height / 2f - 100f, gameOverPaint)
-            canvas.drawText("Skóre: $score", width / 2f, height / 2f, restartPaint)
-            canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 100f, restartPaint)
+            canvas.drawText("GAME OVER", width / 2f, height / 2f - 200f, gameOverPaint)
+            canvas.drawText("Skóre: $score", width / 2f, height / 2f - 50f, restartPaint)
+            canvas.drawText("Klikni pro restart", width / 2f, height / 2f + 50f, restartPaint)
+
+            // Tlačítko výsledků
+            drawResultsButton(canvas)
 
             // Tlačítko nastavení
             drawSettingsButton(canvas)
@@ -264,7 +268,14 @@ class GameView(context: Context) : View(context) {
             )
 
             if (distance < 60) {
-                gameOver = true
+                if (!gameOver) {
+                    gameOver = true
+                    // Uložit výsledek hry pouze jednou
+                    if (!resultSaved) {
+                        settings.saveGameResult(score, level)
+                        resultSaved = true
+                    }
+                }
                 iterator.remove()
                 continue
             }
@@ -363,11 +374,50 @@ class GameView(context: Context) : View(context) {
         paint.textAlign = Paint.Align.LEFT
     }
 
+    private fun drawResultsButton(canvas: Canvas) {
+        // Tlačítko výsledků uprostřed obrazovky
+        val buttonX = width / 2f
+        val buttonY = height / 2f + 150f
+        val buttonWidth = 400f
+        val buttonHeight = 100f
+
+        // Tlačítko na pozadí
+        paint.color = Color.rgb(50, 150, 50)
+        canvas.drawRect(
+            buttonX - buttonWidth / 2,
+            buttonY - buttonHeight / 2,
+            buttonX + buttonWidth / 2,
+            buttonY + buttonHeight / 2,
+            paint
+        )
+
+        // Okraj tlačítka
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 5f
+        canvas.drawRect(
+            buttonX - buttonWidth / 2,
+            buttonY - buttonHeight / 2,
+            buttonX + buttonWidth / 2,
+            buttonY + buttonHeight / 2,
+            paint
+        )
+        paint.style = Paint.Style.FILL
+
+        // Text tlačítka
+        paint.color = Color.WHITE
+        paint.textSize = 50f
+        paint.textAlign = Paint.Align.CENTER
+        canvas.drawText("🏆 VÝSLEDKY", buttonX, buttonY + 18f, paint)
+        paint.textAlign = Paint.Align.LEFT
+    }
+
     private fun restartGame() {
         gameOver = false
         isPaused = false
         score = 0
         level = 1
+        resultSaved = false
         coins.clear()
         obstacles.clear()
         coinSpawnTimer = 0
@@ -397,7 +447,24 @@ class GameView(context: Context) : View(context) {
                     return true
                 }
 
+                // Kontrola kliknutí na tlačítko výsledků (pouze během game over)
                 if (gameOver) {
+                    val resultsButtonX = width / 2f
+                    val resultsButtonY = height / 2f + 150f
+                    val resultsButtonWidth = 400f
+                    val resultsButtonHeight = 100f
+
+                    if (event.x >= resultsButtonX - resultsButtonWidth / 2 &&
+                        event.x <= resultsButtonX + resultsButtonWidth / 2 &&
+                        event.y >= resultsButtonY - resultsButtonHeight / 2 &&
+                        event.y <= resultsButtonY + resultsButtonHeight / 2) {
+                        // Otevřít obrazovku výsledků
+                        val intent = Intent(context, GameResultsActivity::class.java)
+                        context.startActivity(intent)
+                        return true
+                    }
+
+                    // Kliknutí mimo tlačítko výsledků = restart hry
                     restartGame()
                     return true
                 }
